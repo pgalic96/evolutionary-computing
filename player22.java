@@ -49,58 +49,46 @@ public class player22 implements ContestSubmission
 		// Run your algorithm here
         int evals = 0;
 
-        // init population
-        Population population = new Population(20, rnd_, 20);
+        // initialize population with random values, last parameter is learning rate
+				Utility utility = new Utility();
+        Population population = new Population(utility.populationSize, rnd_, utility.offspringNumber, utility.mutation_step);
 
-        // calculate fitness
+        // calculate fitness for initial population
         for (int i = 0; i < population.populationSize; i++) {
         	population.individuals[i].setFitness((double)evaluation_.evaluate(population.individuals[i].vector));
 
 					evals++;
         }
 
-				//population.linearRanking(1.5);
-
         while(evals<evaluations_limit_){
-            // Select parents
-        	int offspringnumber = population.offspringNumber;
-        	Population childPopulation = new Population(offspringnumber, 0);
+					//rank population, if 0 it means linear ranking, if 1 it means exponential, second parameter must be kept
+					population.rank(utility.rankingType, utility.linearRankingValue);
+					//create empty population of children with size defined in parent
+        	Population childPopulation = new Population(population.offspringNumber, 0);
         	int currentOffspring = 0;
+					int offspringnumber = population.offspringNumber;
+					//begin selection/crossover/mutation
         	while (offspringnumber != 0) {
+						//select parents by roulette wheel based on linear/exponential ranking
         		Individual parent1 = new Individual(population.rouletteSelect(rnd_));
         		Individual parent2 = new Individual(population.rouletteSelect(rnd_));
 
-						//crossover
-						childPopulation.individuals[currentOffspring] =new Individual(parent1.wholeArithmeticCrossover(parent2));
-						childPopulation.individuals[currentOffspring].nonUniformMut(rnd_);
-						//evaluate
+						//whole arithmetic crossover with alpha between 0 and 1
+						childPopulation.individuals[currentOffspring] =new Individual(parent1.wholeArithmeticCrossover(parent2, utility.arithmeticCrossoverVal));
+
+						//mutation (nonUniform, Uniform, uncorrelated)
+						childPopulation.individuals[currentOffspring].mutate(utility.mutationChoice, rnd_);
+
+						//evaluate the child after crossover and mutation
 						childPopulation.individuals[currentOffspring].setFitness((double)evaluation_.evaluate(childPopulation.individuals[currentOffspring].vector));
 						evals++;
-						currentOffspring++;
+
+						currentOffspring++; // go to next offspring
         		offspringnumber-=1;
         	}
 
-
-
-            // Apply crossover / mutation operators
-            // Check fitness of unknown function
-            //for (int z = 0; z < childPopulation.populationSize; z++) {
-            //	childPopulation.individuals[z].setFitness((double)evaluation_.evaluate(childPopulation.individuals[z].vector));
-						//	evals++;
-						//}
-						//double previousEval = population.individuals[0].getFitness();
-						//population.individuals[0].nonUniformMut(rnd_);
-						//population.individuals[0].setFitness((double)evaluation_.evaluate(population.individuals[0].vector));
-						//System.out.println(population.individuals[0].getFitness());
-						//evals++;
-						//population = population.takeBest(childPopulation);
-						// if (childPopulation.individuals[0].getFitness() > population.individuals[0].getFitness()) {
-						// 	for (int i =0; i < 10; i++) {
-						// 		System.out.println(i + "  parent: " + population.individuals[0].vector[i] + " ---- child: " +childPopulation.individuals[0].vector[i]);
-						// 	}
-						// }
-            // Select survivors
-            population = population.takeBest(childPopulation);
+            // Select survivors (rank and roulette or take best) last 2 parameters are used for linear/exponential ranking
+            population = population.rankAndRoulette(childPopulation, rnd_, 0,  1.6);
         }
 	}
 }
