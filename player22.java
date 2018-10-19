@@ -60,12 +60,13 @@ public class player22 implements ContestSubmission
         }
 
 				//population.linearRanking(1.5);
-
         while(evals<evaluations_limit_){
             // Select parents
         	int offspringnumber = population.offspringNumber;
         	Population childPopulation = new Population(offspringnumber, 0);
         	int currentOffspring = 0;
+
+					//if number of children is 0, skip this part
         	while (offspringnumber != 0) {
         		Individual parent1 = new Individual(population.rouletteSelect(rnd_));
         		Individual parent2 = new Individual(population.rouletteSelect(rnd_));
