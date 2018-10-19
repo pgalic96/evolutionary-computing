@@ -59,16 +59,6 @@ public class Individual {
 			}
 	}
 
-	public void uncorrelatedMut(Random r) {
-		this.mutation_step = Math.max(0.0,
-		this.mutation_step * Math.exp((1/Math.sqrt(10))*r.nextGaussian()));
-		for(int i = 0; i < this.vector.length; i++) {
-			this.vector[i]+=this.mutation_step*r.nextGaussian();
-
-			this.vector[i] = restrictBound(this.vector[i]);
-		}
-	}
-
 	private double restrictBound(double n) {
 		if (n < -5.0) {
 			return -5.0;
