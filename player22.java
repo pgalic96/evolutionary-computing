@@ -21,10 +21,6 @@ public class player22 implements ContestSubmission
 		rnd_.setSeed(seed);
 	}
 
-	public static void main(String[] args) {
-		System.out.println("Start");
-	}
-
 	public void setEvaluation(ContestEvaluation evaluation)
 	{
 		// Set evaluation problem used in the run
@@ -52,21 +48,61 @@ public class player22 implements ContestSubmission
 	{
 		// Run your algorithm here
         int evals = 0;
+
         // init population
-        Individual population[] = new Individual[100];
-        for (int i = 0; i < population.length; i++) {
-        	population[i] = new Individual(rnd_);
-        }
+        Population population = new Population(1, rnd_, 0);
+
         // calculate fitness
-        while(evals<evaluations_limit_){
-            // Select parents
-            // Apply crossover / mutation operators
-            double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-            // Check fitness of unknown fuction
-            Double fitness = (double) evaluation_.evaluate(child);
-            evals++;
-            // Select survivors
+        for (int i = 0; i < population.populationSize; i++) {
+        	population.individuals[i].setFitness((double)evaluation_.evaluate(population.individuals[i].vector));
+
+					evals++;
         }
 
+				//population.linearRanking(1.5);
+
+        while(evals<evaluations_limit_){
+            // Select parents
+        	int offspringnumber = population.offspringNumber;
+        	Population childPopulation = new Population(offspringnumber, 0);
+        	int currentOffspring = 0;
+        	while (offspringnumber != 0) {
+        		Individual parent1 = new Individual(population.rouletteSelect(rnd_));
+        		Individual parent2 = new Individual(population.rouletteSelect(rnd_));
+
+						//crossover
+						childPopulation.individuals[currentOffspring] =
+						new Individual(parent1.wholeArithmeticCrossover(parent2));
+
+						//mutation
+						childPopulation.individuals[currentOffspring].uncorrelatedMut(rnd_);
+
+						//evaluate
+						childPopulation.individuals[currentOffspring].setFitness((double)evaluation_.evaluate(childPopulation.individuals[currentOffspring].vector));
+						evals++;
+						currentOffspring++;
+        		offspringnumber-=1;
+        	}
+
+
+
+            // Apply crossover / mutation operators
+            // Check fitness of unknown function
+            //for (int z = 0; z < childPopulation.populationSize; z++) {
+            //	childPopulation.individuals[z].setFitness((double)evaluation_.evaluate(childPopulation.individuals[z].vector));
+						//	evals++;
+						//}
+						double previousEval = population.individuals[0].getFitness();
+						population.individuals[0].nonUniformMut(rnd_);
+						population.individuals[0].setFitness((double)evaluation_.evaluate(population.individuals[0].vector));
+						if (previousEval < population.individuals[0].getFitness()) {
+							System.out.println(evals);
+						}
+						evals++;
+						//population = population.takeBest(childPopulation);
+
+            // Select survivors
+            //population = population.rankAndRoulette(childPopulation, rnd_);
+        }
 	}
 }
