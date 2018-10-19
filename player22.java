@@ -50,7 +50,7 @@ public class player22 implements ContestSubmission
         int evals = 0;
 
         // init population
-        Population population = new Population(1, rnd_, 0);
+        Population population = new Population(20, rnd_, 20);
 
         // calculate fitness
         for (int i = 0; i < population.populationSize; i++) {
@@ -60,24 +60,19 @@ public class player22 implements ContestSubmission
         }
 
 				//population.linearRanking(1.5);
+
         while(evals<evaluations_limit_){
             // Select parents
         	int offspringnumber = population.offspringNumber;
         	Population childPopulation = new Population(offspringnumber, 0);
         	int currentOffspring = 0;
-
-					//if number of children is 0, skip this part
         	while (offspringnumber != 0) {
         		Individual parent1 = new Individual(population.rouletteSelect(rnd_));
         		Individual parent2 = new Individual(population.rouletteSelect(rnd_));
 
 						//crossover
-						childPopulation.individuals[currentOffspring] =
-						new Individual(parent1.wholeArithmeticCrossover(parent2));
-
-						//mutation
-						childPopulation.individuals[currentOffspring].uncorrelatedMut(rnd_);
-
+						childPopulation.individuals[currentOffspring] =new Individual(parent1.wholeArithmeticCrossover(parent2));
+						childPopulation.individuals[currentOffspring].nonUniformMut(rnd_);
 						//evaluate
 						childPopulation.individuals[currentOffspring].setFitness((double)evaluation_.evaluate(childPopulation.individuals[currentOffspring].vector));
 						evals++;
@@ -93,17 +88,19 @@ public class player22 implements ContestSubmission
             //	childPopulation.individuals[z].setFitness((double)evaluation_.evaluate(childPopulation.individuals[z].vector));
 						//	evals++;
 						//}
-						double previousEval = population.individuals[0].getFitness();
-						population.individuals[0].nonUniformMut(rnd_);
-						population.individuals[0].setFitness((double)evaluation_.evaluate(population.individuals[0].vector));
-						if (previousEval < population.individuals[0].getFitness()) {
-							System.out.println(evals);
-						}
-						evals++;
+						//double previousEval = population.individuals[0].getFitness();
+						//population.individuals[0].nonUniformMut(rnd_);
+						//population.individuals[0].setFitness((double)evaluation_.evaluate(population.individuals[0].vector));
+						//System.out.println(population.individuals[0].getFitness());
+						//evals++;
 						//population = population.takeBest(childPopulation);
-
+						// if (childPopulation.individuals[0].getFitness() > population.individuals[0].getFitness()) {
+						// 	for (int i =0; i < 10; i++) {
+						// 		System.out.println(i + "  parent: " + population.individuals[0].vector[i] + " ---- child: " +childPopulation.individuals[0].vector[i]);
+						// 	}
+						// }
             // Select survivors
-            //population = population.rankAndRoulette(childPopulation, rnd_);
+            population = population.takeBest(childPopulation);
         }
 	}
 }

@@ -4,7 +4,7 @@ public class Individual {
 
 	double vector[];
 	private double fitness;
-	private double mutation_step = 0.3;
+	private double mutation_step = 0.25;
 	private double selectionProbability;
 
 	//constructor for Individual: random values
@@ -19,7 +19,10 @@ public class Individual {
 	}
 
 	public Individual (Individual parent) {
-		this.vector = parent.vector;
+		this.vector = new double[10];
+		for (int i = 0; i < 10; i++) {
+			this.vector[i] = parent.vector[i];
+		}
 		this.fitness = parent.fitness;
 		this.selectionProbability = parent.selectionProbability;
 	}
@@ -57,6 +60,16 @@ public class Individual {
 					// make sure the values stay within the bounds
 					this.vector[i] = restrictBound(this.vector[i]);
 			}
+	}
+
+	public void uncorrelatedMut(Random r) {
+		this.mutation_step = Math.max(0.0,
+		this.mutation_step * Math.exp((1/Math.sqrt(10))*r.nextGaussian()));
+		for(int i = 0; i < this.vector.length; i++) {
+			this.vector[i]+=this.mutation_step*r.nextGaussian();
+
+			this.vector[i] = restrictBound(this.vector[i]);
+		}
 	}
 
 	private double restrictBound(double n) {
