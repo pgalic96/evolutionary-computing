@@ -1,20 +1,21 @@
 library(dplyr)
 library(dunn.test)
 
-as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+setwd("C:/Users/Jan Haenen/Desktop/assignmentfiles_2018 (1)/assignmentfiles_2017/")
+
 # Creathe dataframe with all possible parameter combinations and write it to a txt file
 SearchSpace = expand.grid(mutation_step = seq(0.1,1,0.3), LinearRankingValue = seq(1, 2, 1/3), rankingType = c(0,1), populationSize = c(20,40,100,200),offspring = c(0.25,0.5,1),crossOverVal = seq(0,0.5,0.25),mutationChoice = c(0,1,2))
 SearchSpace = SearchSpace[-which(SearchSpace$rankingType == 1 & SearchSpace$LinearRankingValue != 1),]
 SearchSpace = mutate(SearchSpace,offspring = populationSize*offspring)
 # Add a variable that shows progress in percentage (also used later to identify unique parameter combinations)
 SearchSpace = mutate(SearchSpace, progress = 100*(1:nrow(SearchSpace))/nrow(SearchSpace))
-write.table(SearchSpace,file = "C:/Users/Jan Haenen/Desktop/assignmentfiles_2018 (1)/assignmentfiles_2017/SchaffersFirstIter.txt",row.names = FALSE, col.names = FALSE)
+write.table(SearchSpace,file = "SchaffersFirstIter.txt",row.names = FALSE, col.names = FALSE)
 
 # Alter the searchspace dataframe to match the output file (each parameter combination is run 5 times)
 SolutionSpace = slice(SearchSpace,rep(1:n(), each = 5))
 
 # Read output and merge with dataframe containing parameter values
-Results = read.delim("C:/Users/Jan Haenen/Desktop/assignmentfiles_2018 (1)/assignmentfiles_2017/SchaffersFirstOutput.txt", sep = " ", header = FALSE)
+Results = read.delim("SchaffersFirstOutput.txt", sep = " ", header = FALSE)
 Results2 = Results[which(Results$V1 == "Score:"),]
 SolutionSpace = mutate(SolutionSpace, result = as.numeric.factor(Results2$V2))
 
@@ -28,4 +29,4 @@ summary = summarise(group_by(SolutionSpace,progress),mutation_step = mutation_st
 # create new search space containing best solution and solutions that are not significantly worse than best solution
 S.SearchSpaceTWo = select(filter(summary,P>0.05),-progress,-P)
 S.SearchSpaceTWo = mutate(S.SearchSpaceTWo, progress = 100*(1:nrow(S.SearchSpaceTWo))/nrow(S.SearchSpaceTWo))
-write.table(S.SearchSpaceTWo,file = "C:/Users/Jan Haenen/Desktop/assignmentfiles_2018 (1)/assignmentfiles_2017/SchaffersSecondIter.txt",row.names = FALSE, col.names = FALSE)
+write.table(S.SearchSpaceTWo,file = "SchaffersSecondIter.txt",row.names = FALSE, col.names = FALSE)
