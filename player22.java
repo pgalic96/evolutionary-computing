@@ -88,7 +88,7 @@ public class player22 implements ContestSubmission
         	}
 
             // Select survivors (rank and roulette or take best) last 2 parameters are used for linear/exponential ranking
-            population = population.rankAndRoulette(childPopulation, rnd_, 0,  1.6);
+            population = population.rankAndRoulette(childPopulation,  rnd_,utility.rankingType,  utility.linearRankingValue);
         }
 	}
 }
